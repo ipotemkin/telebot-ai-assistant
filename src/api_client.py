@@ -28,9 +28,8 @@ async def send_user_message(
     """
     Отправить сообщение пользователя в API и вернуть ответ ассистента.
 
-    Синхронный вызов OpenAIAssistant выполняется в executor, чтобы не
-    блокировать event loop. Запросы одного пользователя выполняются
-    строго по очереди, чтобы сохранялся контекст диалога.
+    Запросы одного пользователя выполняются строго по очереди, чтобы
+    сохранялся контекст диалога.
 
     Args:
         context_manager: Менеджер контекста (история по user_id).
@@ -56,14 +55,8 @@ async def send_user_message(
         )
         logger.debug("Параметры запроса: user_message=%s", text[:200])
 
-        loop = asyncio.get_event_loop()
-
-        def _sync_send() -> str:
-            reply, _thinking = assistant.send_message(text)
-            return reply
-
         try:
-            reply = await loop.run_in_executor(None, _sync_send)
+            reply, _thinking = await assistant.send_message(text)
             logger.info(
                 "Ответ получен: user_id=%s, reply_len=%s",
                 user_id,

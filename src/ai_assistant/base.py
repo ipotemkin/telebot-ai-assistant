@@ -1,9 +1,9 @@
-"""Базовые классы для AI ассистентов."""
+"""Базовые классы для AI ассистентов (асинхронные)."""
 
 import logging
 from abc import ABC, abstractmethod
 
-from .client_urlopen import APIClient
+from .client import APIClient
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class BaseAssistant(ABC):
         logger.info("История диалога очищена")
 
     @abstractmethod
-    def send_message(self, user_message: str) -> tuple[str, str | None]:
+    async def send_message(self, user_message: str) -> tuple[str, str | None]:
         """
         Отправить сообщение модели и получить ответ.
 
@@ -87,7 +87,7 @@ class BaseAssistant(ABC):
 class Assistant(BaseAssistant):
     """Базовый класс с общей реализацией для ассистентов."""
 
-    def send_message(self, user_message: str) -> tuple[str, str | None]:
+    async def send_message(self, user_message: str) -> tuple[str, str | None]:
         """
         Отправить сообщение модели и получить ответ.
 
@@ -110,7 +110,7 @@ class Assistant(BaseAssistant):
 
         try:
             payload = self._build_payload(messages_for_api)
-            response_data = self._send_api_request(payload)
+            response_data = await self._send_api_request(payload)
 
             assistant_message = self._extract_message(response_data)
             thinking_content = self._extract_thinking(response_data)
@@ -151,15 +151,13 @@ class Assistant(BaseAssistant):
         # Нативный Anthropic формат
         content_blocks = response_data.get("content", [])
         message = ""
-
         for block in content_blocks:
             if block.get("type") == "text":
                 message += block.get("text", "")
-
         return message
 
     @abstractmethod
-    def _send_api_request(self, payload: dict) -> dict:
+    async def _send_api_request(self, payload: dict) -> dict:
         """
         Отправить запрос к API.
 

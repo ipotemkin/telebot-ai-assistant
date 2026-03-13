@@ -1,4 +1,4 @@
-"""Ассистент для работы с OpenAI моделями через ProxyAPI."""
+"""Ассистент для работы с OpenAI моделями через ProxyAPI (асинхронный)."""
 
 import logging
 
@@ -28,7 +28,7 @@ class OpenAIAssistant(Assistant):
             payload["max_tokens"] = self.model_config["max_tokens"]
         return payload
 
-    def _send_api_request(self, payload: dict) -> dict:
+    async def _send_api_request(self, payload: dict) -> dict:
         """
         Отправить запрос к OpenAI API.
 
@@ -38,7 +38,7 @@ class OpenAIAssistant(Assistant):
         Returns:
             Ответ API
         """
-        return self.client.send_openai_request(
+        return await self.client.send_openai_request(
             model_id=payload["model"],
             messages=payload["messages"],
             temperature=payload.get("temperature"),
@@ -55,5 +55,4 @@ class OpenAIAssistant(Assistant):
         Returns:
             Рассуждения или None (OpenAI модели не поддерживают рассуждения)
         """
-        # OpenAI модели не поддерживают рассуждения
         return None
