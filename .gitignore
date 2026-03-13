@@ -5,3 +5,7 @@ data/
 .env
 venv/
 .venv/
+
+# Прочее
+.DS_store
+etc
